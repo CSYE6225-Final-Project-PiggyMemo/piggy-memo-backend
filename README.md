@@ -57,4 +57,4 @@ piggy-memo-backend/
 ### Configuration Files
 
 - **`application.properties`** — shared/default configuration (e.g., server port, common settings).
-- **`application-local.properties`** — local-only overrides (e.g., local DB credentials); typically excluded from version control or used with the `local` Spring profile.
+- **`application-local.properties`** — local-only overrides (e.g., local DB credentials); typically excluded from version control or used with the `local` Spring profile. WARNING! NEVER PUBLISH THIS FILE!
