@@ -11,6 +11,11 @@ To start the Spring Boot project, run the following command under the `piggymemo
 ```bash
 mvn spring-boot:run -DskipTests
 ```
+For packed fat jars, when running the .jar package, directory of application-local.properties must be assigned explicitly:
+
+```bash
+java -jar [jar package name].jar --spring.config.location=[directory/to/application-local.properties]
+```
 
 ## 3. Common Structure for Spring Boot Project
 
