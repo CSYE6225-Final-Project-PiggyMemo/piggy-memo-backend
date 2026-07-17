@@ -1,5 +1,5 @@
 package com.csye6225.piggymemo.repository;
 
-public class SampleRepository {
+public class UserRepository {
 
 }

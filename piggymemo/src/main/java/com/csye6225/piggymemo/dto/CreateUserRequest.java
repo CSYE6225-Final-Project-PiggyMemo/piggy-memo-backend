@@ -1,5 +1,5 @@
 package com.csye6225.piggymemo.dto;
 
-public class SampleRequest {
+public class CreateUserRequest {
 
 }
