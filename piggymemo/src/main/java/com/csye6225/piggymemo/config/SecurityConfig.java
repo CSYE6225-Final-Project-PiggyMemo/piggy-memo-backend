@@ -18,6 +18,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+            //For easier debugging. Enable when deployed.
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(
                 auth -> auth
