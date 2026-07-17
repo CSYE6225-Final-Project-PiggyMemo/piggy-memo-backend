@@ -1,5 +1,9 @@
 package com.csye6225.piggymemo.repository;
 
-public class UserRepository {
+import org.springframework.data.jpa.repository.JpaRepository;
 
+import com.csye6225.piggymemo.entity.User;
+
+public interface UserRepository extends JpaRepository<User, Long> {
+    public boolean existsByUsername(String username);
 }
