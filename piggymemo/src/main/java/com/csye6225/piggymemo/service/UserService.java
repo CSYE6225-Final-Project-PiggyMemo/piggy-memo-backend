@@ -35,6 +35,10 @@ public class UserService {
         return toResponse(save);
     }
 
+    public boolean existsByUsername(String username) {
+        return userRepository.existsByUsername(username);
+    }
+
     public UserResponse toResponse(User user) {
         UserResponse response = new UserResponse();
 

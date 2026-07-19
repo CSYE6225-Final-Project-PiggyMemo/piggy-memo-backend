@@ -11,6 +11,9 @@ import jakarta.validation.Valid;
 
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 
 
@@ -27,4 +30,10 @@ public class UserController {
     public UserResponse create(@Valid @RequestBody CreateUserRequest req) {
         return userService.createUser(req);
     }
+
+    @GetMapping("/exists")
+    public boolean existsByUsername(@RequestParam String username) {
+        return userService.existsByUsername(username);
+    }
+    
 }
