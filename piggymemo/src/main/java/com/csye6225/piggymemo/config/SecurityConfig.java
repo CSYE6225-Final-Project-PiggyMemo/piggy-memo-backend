@@ -46,7 +46,8 @@ public class SecurityConfig {
 
         config.setAllowedOrigins(List.of(
             "http://localhost:3000",
-            "https://piggymemo.vercel.app"
+            "https://piggymemo.vercel.app",
+            "https://api.piggymemo.cherrycaketech.com"
         ));
         config.setAllowedMethods(List.of(
             "GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"
