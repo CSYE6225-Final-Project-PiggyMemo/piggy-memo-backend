@@ -1,11 +1,5 @@
 package com.csye6225.piggymemo.service;
 
-import java.time.Duration;
-import java.util.Map;
-
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseCookie;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -24,23 +18,13 @@ public class AuthService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public ResponseEntity<Map<String, String>> login(LoginRequest req) {
+    public String loginAndGetToken(LoginRequest req) {
         String username = req.getUsername();
         String password = req.getPassword();
         
         String token = validateAndGetToken(username, password);
-        //Generate cookie and encapsulate token
-        ResponseCookie cookie = ResponseCookie.from("token", token)
-            .httpOnly(true)
-            .path("/")
-            .sameSite("None")
-            .secure(true)
-            .maxAge(Duration.ofHours(1))
-            .build();
 
-        return ResponseEntity.ok()
-            .header(HttpHeaders.SET_COOKIE, cookie.toString())
-            .body(Map.of("message", "Login success"));
+        return token;
     }
 
     private String validateAndGetToken(String username, String password) {
