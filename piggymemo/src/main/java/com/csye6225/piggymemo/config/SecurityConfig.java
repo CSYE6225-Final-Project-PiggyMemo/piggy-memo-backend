@@ -47,6 +47,13 @@ public class SecurityConfig {
             .formLogin(f -> f.disable())
             .httpBasic(b -> b.disable())
             .cors(cors -> {})
+            .exceptionHandling(e -> e
+                .authenticationEntryPoint((req, res, exception) -> {
+                    res.setStatus(401);
+                    res.setContentType("application/json");
+                    res.getWriter().write("{\"message\":\"You're not logged in\"}");
+                })
+            )
         ;
 
         return http.build();
