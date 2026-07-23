@@ -25,7 +25,8 @@ public class SecurityConfig {
                 auth -> auth
                     .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/users/*").permitAll()
-                    .requestMatchers("/api/auth/**").permitAll()
+                    .requestMatchers("/api/auth/login").permitAll()
+                    .requestMatchers("/").permitAll()
                     .anyRequest().authenticated()
             )
             .sessionManagement(
