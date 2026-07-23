@@ -2,11 +2,13 @@ package com.csye6225.piggymemo.service;
 
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 
 import com.csye6225.piggymemo.dto.LoginRequest;
 import com.csye6225.piggymemo.entity.User;
 import com.csye6225.piggymemo.repository.UserRepository;
 
+@Service
 public class AuthService {
     private final JwtService jwtService;
     private final UserRepository userRepository;
