@@ -1,7 +1,6 @@
 package com.csye6225.piggymemo.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 
 public class LoginRequest {
     @NotBlank(message = "Username cannot be empty.")
