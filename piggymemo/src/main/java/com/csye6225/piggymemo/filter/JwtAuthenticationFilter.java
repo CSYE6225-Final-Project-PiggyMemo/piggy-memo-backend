@@ -1,21 +1,21 @@
 package com.csye6225.piggymemo.filter;
 
-import java.io.IOException;
-import java.util.Collections;
-
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Component;
-import org.springframework.web.filter.OncePerRequestFilter;
-
+import com.csye6225.piggymemo.entity.JwtPayload;
 import com.csye6225.piggymemo.service.JwtService;
-
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import java.io.IOException;
+import java.util.List;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -28,20 +28,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        
+
         String token = extractToken(request);
 
-        if(token != null) {
+        if (token != null) {
             try {
-                String username = jwtService.validateAndGetUsername(token);
-                
-                var auth = new UsernamePasswordAuthenticationToken(
-                    username, null, Collections.emptyList()
-                );
-
+                JwtPayload payload = jwtService.validateAndGetPayload(token);
+                List<SimpleGrantedAuthority> authorities = payload.authorities()
+                        .stream()
+                        .map(SimpleGrantedAuthority::new)
+                        .toList();
+                var auth = new UsernamePasswordAuthenticationToken(payload.username(), null, authorities);
                 SecurityContextHolder.getContext().setAuthentication(auth);
-            }
-            catch(JwtException e) {
+            } catch (JwtException e) {
                 //Do nothing, let filter chain handle that
             }
         }
@@ -49,10 +48,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private String extractToken(HttpServletRequest req) {
-        if(req.getCookies() == null) return null;
+        if (req.getCookies() == null) return null;
 
-        for(Cookie c: req.getCookies()) {
-            if("token".equals(c.getName())) {
+        for (Cookie c : req.getCookies()) {
+            if ("token".equals(c.getName())) {
                 return c.getValue();
             }
         }

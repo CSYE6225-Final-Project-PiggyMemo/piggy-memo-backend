@@ -2,6 +2,7 @@ package com.csye6225.piggymemo.config;
 
 import java.util.List;
 
+import com.csye6225.piggymemo.constant.Constants;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -20,7 +21,6 @@ import com.csye6225.piggymemo.filter.JwtAuthenticationFilter;
 @EnableWebSecurity
 public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    
 
     public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
@@ -38,6 +38,7 @@ public class SecurityConfig {
                     .requestMatchers(HttpMethod.GET, "/api/users/*").permitAll()
                     .requestMatchers("/api/auth/login").permitAll()
                     .requestMatchers("/").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/api/admin/users/**").hasAuthority(Constants.ADMIN_AUTHORITY)
                     .anyRequest().authenticated()
             )
             .sessionManagement(
@@ -46,7 +47,8 @@ public class SecurityConfig {
             )
             .formLogin(f -> f.disable())
             .httpBasic(b -> b.disable())
-            .cors(cors -> {})
+            .cors(cors -> {
+            })
             .exceptionHandling(e -> e
                 .authenticationEntryPoint((req, res, exception) -> {
                     res.setStatus(401);

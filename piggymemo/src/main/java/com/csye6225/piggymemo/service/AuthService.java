@@ -1,6 +1,9 @@
 package com.csye6225.piggymemo.service;
 
+import org.jspecify.annotations.NonNull;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -11,32 +14,34 @@ import com.csye6225.piggymemo.repository.UserRepository;
 @Service
 public class AuthService {
     private final JwtService jwtService;
-    private final UserRepository userRepository;
+    private final PiggymemoUserDetailsManager userDetailsManager;
     private final PasswordEncoder passwordEncoder;
 
-    public AuthService(JwtService jwtService, UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public AuthService(JwtService jwtService, PiggymemoUserDetailsManager userDetailsManager, PasswordEncoder passwordEncoder) {
         this.jwtService = jwtService;
-        this.userRepository = userRepository;
+        this.userDetailsManager = userDetailsManager;
         this.passwordEncoder = passwordEncoder;
     }
 
     public String loginAndGetToken(LoginRequest req) {
         String username = req.getUsername();
         String password = req.getPassword();
-        
-        String token = validateAndGetToken(username, password);
-
-        return token;
+        return validateAndGetToken(username, password);
     }
 
     private String validateAndGetToken(String username, String password) {
-        User user = userRepository.findByUsername(username).orElseThrow(() ->
-            new BadCredentialsException("Wrong username or password, please check your information."));
-        
-        if(!(passwordEncoder.matches(password, user.getPassword()))) {
+        UserDetails userDetails = getUserDetails(username);
+        if (!(passwordEncoder.matches(password, userDetails.getPassword()))) {
             throw new BadCredentialsException("Wrong username or password, please check your information.");
         }
+        return jwtService.generateToken(userDetails);
+    }
 
-        return jwtService.generateToken(username);
+    private UserDetails getUserDetails(String username) {
+        try {
+            return userDetailsManager.loadUserByUsername(username);
+        } catch (UsernameNotFoundException e) {
+            throw new BadCredentialsException("Wrong username or password, please check your information.");
+        }
     }
 }
