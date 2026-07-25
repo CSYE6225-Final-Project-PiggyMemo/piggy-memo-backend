@@ -12,7 +12,7 @@ public class Authority {
     private Long id;
 
     /**
-     * 用户角色
+     * User role
      */
     @Column(name = "identity", length = Integer.MAX_VALUE)
     private String identity;
