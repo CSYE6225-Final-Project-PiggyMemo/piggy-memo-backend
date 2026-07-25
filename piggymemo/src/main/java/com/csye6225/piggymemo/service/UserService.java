@@ -1,5 +1,6 @@
 package com.csye6225.piggymemo.service;
 
+import com.csye6225.piggymemo.constant.Constants;
 import com.csye6225.piggymemo.dto.CreateUserRequest;
 import com.csye6225.piggymemo.dto.UserResponse;
 import com.csye6225.piggymemo.entity.User;
@@ -9,7 +10,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class UserService {
-    private static final String DEFAULT_AUTHORITY = "USER";
 
     private final PasswordEncoder passwordEncoder;
     private final PiggymemoUserDetailsManager userDetailsManager;
@@ -25,7 +25,7 @@ public class UserService {
         UserDetails userDetails = org.springframework.security.core.userdetails.User
             .withUsername(req.getUsername())
             .password(passwordEncoder.encode(req.getPassword()))
-            .authorities(DEFAULT_AUTHORITY)
+            .authorities(Constants.DEFAULT_AUTHORITY)
             .build();
         return toResponse(userDetailsManager.createUserAndReturn(userDetails));
     }

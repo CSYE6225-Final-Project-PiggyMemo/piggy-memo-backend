@@ -1,6 +1,7 @@
 package com.csye6225.piggymemo.service;
 
 import com.csye6225.piggymemo.config.AdminAccountProperties;
+import com.csye6225.piggymemo.constant.Constants;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -10,8 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class AdminAccountInitializer implements ApplicationRunner {
-    private static final String ADMIN_AUTHORITY = "ADMIN";
-    private static final String DEFAULT_AUTHORITY = "USER";
 
     private final PiggymemoUserDetailsManager piggymemoUserDetailsManager;
     private final PasswordEncoder passwordEncoder;
@@ -41,7 +40,7 @@ public class AdminAccountInitializer implements ApplicationRunner {
         UserDetails userDetails = org.springframework.security.core.userdetails.User
             .withUsername(username)
             .password(passwordEncoder.encode(rawPassword))
-            .authorities(ADMIN_AUTHORITY, DEFAULT_AUTHORITY)
+            .authorities(Constants.ADMIN_AUTHORITY, Constants.DEFAULT_AUTHORITY)
             .build();
         piggymemoUserDetailsManager.createUser(userDetails);
     }

@@ -31,10 +31,10 @@ public class PiggymemoUserDetailsManager implements UserDetailsManager {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByUsername(username)
             .orElseThrow(() -> new UsernameNotFoundException(username));
-        String[] authorities = (String[]) authorityRepository.findAllByUid(user.getId())
+        String[] authorities = authorityRepository.findAllByUid(user.getId())
             .stream()
             .map(Authority::getIdentity)
-            .toArray();
+            .toArray(String[]::new);
         return org.springframework.security.core.userdetails.User
             .withUsername(user.getUsername())
             .password(user.getPassword())
