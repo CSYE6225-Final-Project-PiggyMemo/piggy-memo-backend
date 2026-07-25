@@ -5,12 +5,13 @@ import com.csye6225.piggymemo.entity.User;
 import com.csye6225.piggymemo.exception.UsernameAlreadyExistsException;
 import com.csye6225.piggymemo.repository.AuthorityRepository;
 import com.csye6225.piggymemo.repository.UserRepository;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 /**
  * Spring Security adaptor
@@ -30,11 +31,14 @@ public class PiggymemoUserDetailsManager implements UserDetailsManager {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByUsername(username)
             .orElseThrow(() -> new UsernameNotFoundException(username));
-        Authority authority = authorityRepository.findByUid(user.getId());
+        String[] authorities = (String[]) authorityRepository.findAllByUid(user.getId())
+            .stream()
+            .map(Authority::getIdentity)
+            .toArray();
         return org.springframework.security.core.userdetails.User
             .withUsername(user.getUsername())
             .password(user.getPassword())
-            .authorities(authority.getIdentity())
+            .authorities(authorities)
             .build();
     }
 
@@ -57,13 +61,15 @@ public class PiggymemoUserDetailsManager implements UserDetailsManager {
         user.setUsername(userDetails.getUsername());
         user.setPassword(userDetails.getPassword());
         User savedUser = userRepository.save(user);
-        Authority authority = new Authority();
-        authority.setUid(savedUser.getId());
-        authority.setIdentity(userDetails.getAuthorities().stream()
-            .findFirst()
-            .map(GrantedAuthority::getAuthority)
-            .orElseThrow());
-        authorityRepository.save(authority);
+        List<Authority> authorities = userDetails.getAuthorities().stream()
+            .map(grantedAuthority -> {
+                Authority authority = new Authority();
+                authority.setUid(savedUser.getId());
+                authority.setIdentity(grantedAuthority.getAuthority());
+                return authority;
+            })
+            .toList();
+        authorityRepository.saveAll(authorities);
         return savedUser;
     }
 
