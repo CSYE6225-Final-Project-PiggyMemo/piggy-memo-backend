@@ -17,7 +17,7 @@ public class TokenBlacklist {
     private Long Id;
 
     @Column(nullable = false, unique = true)
-    private String token;
+    private String jti;
 
     @Column(name = "expires_at", nullable = false)
     private OffsetDateTime expiresAt;
@@ -33,12 +33,12 @@ public class TokenBlacklist {
         Id = id;
     }
 
-    public String getToken() {
-        return token;
+    public String getJti() {
+        return jti;
     }
 
-    public void setToken(String token) {
-        this.token = token;
+    public void setJti(String jti) {
+        this.jti = jti;
     }
 
     public OffsetDateTime getExpiresAt() {
