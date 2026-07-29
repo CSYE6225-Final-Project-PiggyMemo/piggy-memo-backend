@@ -14,9 +14,12 @@ import org.springframework.stereotype.Service;
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class JwtService {
@@ -44,6 +47,7 @@ public class JwtService {
         return Jwts
             .builder()
             .subject(userDetails.getUsername())
+            .id(UUID.randomUUID().toString())
             .claim(AUTHORITIES_CLAIM, authorities)
             .claim(UID_CLAIM, user.getId())
             .issuedAt(Date.from(now))
@@ -58,16 +62,26 @@ public class JwtService {
             .build()
             .parseSignedClaims(token)
             .getPayload();
+
         Long userId = claims.get(UID_CLAIM, Long.class);
+
         if (userId == null) {
             throw new JwtException("Missing uid claim");
         }
+
         String username = claims.getSubject();
+
         @SuppressWarnings("unchecked")
         List<String> authorities = claims.get(AUTHORITIES_CLAIM, List.class);
         if (authorities == null) {
             authorities = Collections.emptyList();
         }
-        return new JwtPayload(userId, username, authorities);
+
+        String jti = claims.getId();
+
+        Date expiration = claims.getExpiration();
+        OffsetDateTime expiresAt = expiration.toInstant().atOffset(ZoneOffset.UTC);
+
+        return new JwtPayload(userId, username, authorities, jti, expiresAt);
     }
 }
