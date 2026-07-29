@@ -22,11 +22,16 @@ public class ProfileService {
     @Transactional
     public Profile updateProfile(Long id, ProfileUpdateRequest request) {
         Profile profile = profileRepository.findByUser(id).orElseThrow(() -> new RuntimeException("Profile not found"));
-        profile.setAvatarUrl(request.avatarUrl());
-        profile.setNickname(request.nickname());
-        profile.setBio(request.bio());
-        profile.setIsProfilePublic(request.isProfilePublic());
-        profile.setFamily(request.family());
+        if(request.avatarUrl() != null)
+            profile.setAvatarUrl(request.avatarUrl());
+        if(request.nickname() != null)
+            profile.setNickname(request.nickname());
+        if(request.bio() != null)
+            profile.setBio(request.bio());
+        if(request.isProfilePublic() != null)
+            profile.setIsProfilePublic(request.isProfilePublic());
+        if(request.family() != null)
+            profile.setFamily(request.family());
         return profileRepository.save(profile);
     }
 
