@@ -4,7 +4,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.csye6225.piggymemo.dto.LoginRequest;
+import com.csye6225.piggymemo.entity.CurrentUser;
 import com.csye6225.piggymemo.service.AuthService;
+import com.csye6225.piggymemo.service.TokenBlacklistService;
 
 import java.time.Duration;
 import java.util.Map;
@@ -12,6 +14,7 @@ import java.util.Map;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -20,9 +23,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 @RequestMapping("/api/auth")
 public class AuthController {
     private final AuthService authService;
+    private final TokenBlacklistService blacklistService;
 
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService, TokenBlacklistService blacklistService) {
         this.authService = authService;
+        this.blacklistService = blacklistService;
     }
     
     @PostMapping("/login")
@@ -44,7 +49,11 @@ public class AuthController {
     }
     
     @PostMapping("/logout")
-    public ResponseEntity<Map<String, String>> logout() {
+    public ResponseEntity<Map<String, String>> logout(@AuthenticationPrincipal CurrentUser currentUser) {
+        if(currentUser != null) {
+            blacklistService.revoke(currentUser.jti(), currentUser.expiresAt());
+        }
+
         ResponseCookie cookie = ResponseCookie.from("token", "")
             .httpOnly(true)
             .path("/")

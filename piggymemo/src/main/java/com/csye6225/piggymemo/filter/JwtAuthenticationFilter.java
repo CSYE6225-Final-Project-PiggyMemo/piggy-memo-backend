@@ -46,7 +46,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                             .stream()
                             .map(SimpleGrantedAuthority::new)
                             .toList();
-                    CurrentUser principal = new CurrentUser(payload.userId(), payload.username());
+                    CurrentUser principal = new CurrentUser(payload.userId(), payload.username(), payload.jti(), payload.expiresAt());
                     var auth = new UsernamePasswordAuthenticationToken(principal, null, authorities);
                     SecurityContextHolder.getContext().setAuthentication(auth);
                 }
