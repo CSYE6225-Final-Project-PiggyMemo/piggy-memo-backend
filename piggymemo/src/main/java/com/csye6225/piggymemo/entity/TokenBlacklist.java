@@ -30,7 +30,7 @@ public class TokenBlacklist {
     }
 
     public void setId(Long id) {
-        id = id;
+        this.id = id;
     }
 
     public String getJti() {
