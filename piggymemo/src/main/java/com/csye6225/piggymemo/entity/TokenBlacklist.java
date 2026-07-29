@@ -14,7 +14,7 @@ import jakarta.persistence.Table;
 public class TokenBlacklist {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long Id;
+    private Long id;
 
     @Column(nullable = false, unique = true)
     private String jti;
@@ -26,11 +26,11 @@ public class TokenBlacklist {
     }
 
     public Long getId() {
-        return Id;
+        return id;
     }
 
     public void setId(Long id) {
-        Id = id;
+        id = id;
     }
 
     public String getJti() {
