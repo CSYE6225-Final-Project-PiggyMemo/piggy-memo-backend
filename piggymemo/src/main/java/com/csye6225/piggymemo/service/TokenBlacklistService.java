@@ -4,6 +4,7 @@ import java.time.OffsetDateTime;
 
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.csye6225.piggymemo.entity.TokenBlacklist;
 import com.csye6225.piggymemo.repository.TokenBlacklistRepository;
@@ -27,7 +28,8 @@ public class TokenBlacklistService {
         return tokenBlacklistRepository.existsByJti(jti);
     }
 
-    @Scheduled(cron = "0 0 * * * *")
+    @Transactional
+    @Scheduled(cron = "0 * * * * *")
     public void cleanExpired() {
         tokenBlacklistRepository.deleteAllByExpiresAtBefore(OffsetDateTime.now());
     }
