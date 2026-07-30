@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 
 import com.csye6225.piggymemo.dto.SetBudgetRequest;
 import com.csye6225.piggymemo.dto.SetBudgetResponse;
+import com.csye6225.piggymemo.entity.Budgets;
 import com.csye6225.piggymemo.entity.PersonalBudgets;
 import com.csye6225.piggymemo.repository.PersonalBudgetsRepository;
 
@@ -21,21 +22,23 @@ public class BudgetService {
     }
 
     public SetBudgetResponse setBudget(
-        Long id, SetBudgetRequest req
+        Long user, SetBudgetRequest req
     ){
-        if(profileService.getProfileFamily(id) == null) {
-            
-        }
-        else {
-
-        }
+        Budgets budget = findBudgetOrCreate(user);
     }
         
 
-    private SetBudgetResponse createDefaultBudget() {
+    private Budgets findBudgetOrCreate(Long user) {
+        Long family = profileService.getProfileFamily(user);
 
+        if(family == null) {
+            return personalBudgetsRepository.findByUser(user).orElseGet(() -> new PersonalBudgets());
+        }
+        else {
+            //TODO: Family budget implementation and family-owner-only write privilege
+            //if(!FamilyService.isFamilyOwner()) 
+            // throw new FamilyBudgetAccessDeniedException("Only owner can operate family budget");
+            //familyBudgetRepository.findByFamily(family).orElseGet(() -> new FamilyBudgets());
+        }
     }
-
-    //TODO: Overload createDefaultBudget() for family budget
-    //private FamilyBudgets createDefaultBudget() {}
 }
