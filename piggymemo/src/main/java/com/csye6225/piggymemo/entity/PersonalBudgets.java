@@ -17,7 +17,7 @@ import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "personal_budgets")
-public class PersonalBudgets {
+public class PersonalBudgets implements Budgets {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -41,6 +41,7 @@ public class PersonalBudgets {
     @Column(name = "period_first_day", nullable = false)
     private LocalDate periodFirstDay;
 
+    @Override
     public Long getId() {
         return id;
     }
@@ -49,6 +50,7 @@ public class PersonalBudgets {
         this.id = id;
     }
 
+    @Override
     public OffsetDateTime getCreatedAt() {
         return createdAt;
     }
@@ -57,6 +59,7 @@ public class PersonalBudgets {
         this.createdAt = createdAt;
     }
 
+    @Override
     public Long getUser() {
         return user;
     }
@@ -65,6 +68,7 @@ public class PersonalBudgets {
         this.user = user;
     }
 
+    @Override
     public BigDecimal getMonthlyBudget() {
         return monthlyBudget;
     }
@@ -73,6 +77,7 @@ public class PersonalBudgets {
         this.monthlyBudget = monthlyBudget;
     }
 
+    @Override
     public BigDecimal getDailyLimit() {
         return dailyLimit;
     }
@@ -81,6 +86,7 @@ public class PersonalBudgets {
         this.dailyLimit = dailyLimit;
     }
 
+    @Override
     public LocalDate getPeriodFirstDay() {
         return periodFirstDay;
     }

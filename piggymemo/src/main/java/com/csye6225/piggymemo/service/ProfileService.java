@@ -35,6 +35,11 @@ public class ProfileService {
         return profileRepository.save(profile);
     }
 
+    protected Long getProfileFamily(Long id) {
+        Profile profile = profileRepository.findByUser(id).orElseThrow(() -> new RuntimeException("Profile not found"));
+        return profile.getFamily();
+    }
+
     private Profile createDefaultProfile(Long id, String username) {
         Profile profile = new Profile();
         profile.setUser(id);
