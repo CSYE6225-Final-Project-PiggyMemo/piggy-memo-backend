@@ -4,7 +4,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.csye6225.piggymemo.dto.LoginRequest;
-import com.csye6225.piggymemo.entity.CurrentUser;
+import com.csye6225.piggymemo.security.CurrentUser;
 import com.csye6225.piggymemo.service.AuthService;
 import com.csye6225.piggymemo.service.TokenBlacklistService;
 

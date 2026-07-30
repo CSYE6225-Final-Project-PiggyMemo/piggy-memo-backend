@@ -1,7 +1,8 @@
 package com.csye6225.piggymemo.service;
 
-import com.csye6225.piggymemo.entity.JwtPayload;
 import com.csye6225.piggymemo.entity.User;
+import com.csye6225.piggymemo.security.JwtPayload;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;

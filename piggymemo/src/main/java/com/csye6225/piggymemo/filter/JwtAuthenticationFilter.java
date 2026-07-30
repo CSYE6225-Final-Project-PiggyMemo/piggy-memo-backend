@@ -1,7 +1,7 @@
 package com.csye6225.piggymemo.filter;
 
-import com.csye6225.piggymemo.entity.CurrentUser;
-import com.csye6225.piggymemo.entity.JwtPayload;
+import com.csye6225.piggymemo.security.CurrentUser;
+import com.csye6225.piggymemo.security.JwtPayload;
 import com.csye6225.piggymemo.service.JwtService;
 import com.csye6225.piggymemo.service.TokenBlacklistService;
 

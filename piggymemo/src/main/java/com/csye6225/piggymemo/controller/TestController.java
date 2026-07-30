@@ -1,10 +1,11 @@
 package com.csye6225.piggymemo.controller;
 
-import com.csye6225.piggymemo.entity.CurrentUser;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.csye6225.piggymemo.security.CurrentUser;
 
 import java.util.Map;
 

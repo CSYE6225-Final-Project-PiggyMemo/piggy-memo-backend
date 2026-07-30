@@ -1,4 +1,4 @@
-package com.csye6225.piggymemo.entity;
+package com.csye6225.piggymemo.security;
 
 import java.time.OffsetDateTime;
 import java.util.List;
