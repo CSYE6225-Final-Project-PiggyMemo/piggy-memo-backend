@@ -1,5 +1,7 @@
 package com.csye6225.piggymemo.entity;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 
 import org.hibernate.annotations.Generated;
@@ -29,6 +31,16 @@ public class PersonalBudgets {
     @Column(name = "user_id", nullable = false)
     private Long user;
 
+    @Column(name = "monthly_budget", precision = 11, scale = 2)
+    private BigDecimal monthlyBudget;
+
+    @Column(name = "daily_limit", precision = 11, scale = 2)
+    private BigDecimal dailyLimit;
+
+    @NotNull
+    @Column(name = "period_first_day", nullable = false)
+    private LocalDate periodFirstDay;
+
     public Long getId() {
         return id;
     }
@@ -51,6 +63,30 @@ public class PersonalBudgets {
 
     public void setUser(Long user) {
         this.user = user;
+    }
+
+    public BigDecimal getMonthlyBudget() {
+        return monthlyBudget;
+    }
+
+    public void setMonthlyBudget(BigDecimal monthlyBudget) {
+        this.monthlyBudget = monthlyBudget;
+    }
+
+    public BigDecimal getDailyLimit() {
+        return dailyLimit;
+    }
+
+    public void setDailyLimit(BigDecimal dailyLimit) {
+        this.dailyLimit = dailyLimit;
+    }
+
+    public LocalDate getPeriodFirstDay() {
+        return periodFirstDay;
+    }
+
+    public void setPeriodFirstDay(LocalDate periodFirstDay) {
+        this.periodFirstDay = periodFirstDay;
     }
     
 }
