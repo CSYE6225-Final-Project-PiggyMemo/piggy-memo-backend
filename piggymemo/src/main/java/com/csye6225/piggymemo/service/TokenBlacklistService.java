@@ -29,7 +29,7 @@ public class TokenBlacklistService {
     }
 
     @Transactional
-    @Scheduled(cron = "0 * * * * *")
+    @Scheduled(cron = "0 0 * * * *")
     public void cleanExpired() {
         tokenBlacklistRepository.deleteAllByExpiresAtBefore(OffsetDateTime.now());
     }
