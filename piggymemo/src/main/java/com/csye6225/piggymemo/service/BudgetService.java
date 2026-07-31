@@ -56,6 +56,35 @@ public class BudgetService {
     }
 
     @Transactional
+    public BudgetResponse getBudget(Long user) {
+        Long family = profileService.getProfileFamily(user);
+
+        if(family == null) {
+            PersonalBudgets budget = personalBudgetsRepository.findByUser(user).orElseGet(() -> {
+                PersonalBudgets emptyBudget = new PersonalBudgets();
+                return emptyBudget;
+            });
+
+            return new BudgetResponse(budget.getMonthlyBudget(), budget.getDailyLimit(), budget.getPeriodFirstDay());
+        }
+        else {
+            //TODO: Family budget logics. Notice that all members have read access.
+            // FamilyBudgets budget = familyBudgetsRepository.findByFamily(family).orElseGet(() -> {
+            //     FamilyBudgets emptyBudget = new FamilyBudgets();
+            //     return emptyBudget;
+            // });
+            //
+            // return new BudgetResponse(budget.getMonthlyBudget(), budget.getDailyLimit(), budget.getPeriodFirstDay());
+            PersonalBudgets budget = personalBudgetsRepository.findByUser(user).orElseGet(() -> {
+                PersonalBudgets emptyBudget = new PersonalBudgets();
+                return emptyBudget;
+            });
+
+            return new BudgetResponse(budget.getMonthlyBudget(), budget.getDailyLimit(), budget.getPeriodFirstDay());
+        }
+    }
+
+    @Transactional
     public void deleteBudget(Long user) {
         Long family = profileService.getProfileFamily(user);
 

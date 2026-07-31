@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 
 
@@ -33,8 +32,8 @@ public class BudgetController {
     }
 
     @GetMapping("/fetch")
-    public BudgetResponse fetchBudget(@RequestParam String param) {
-        return new BudgetResponse();
+    public BudgetResponse fetchBudget(@AuthenticationPrincipal CurrentUser user) {
+        return budgetService.getBudget(user.id());
     }
     
     
