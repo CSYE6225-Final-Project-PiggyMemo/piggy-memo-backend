@@ -8,6 +8,8 @@ import com.csye6225.piggymemo.dto.BudgetResponse;
 import com.csye6225.piggymemo.security.CurrentUser;
 import com.csye6225.piggymemo.service.BudgetService;
 
+import jakarta.validation.Valid;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -27,7 +29,7 @@ public class BudgetController {
     }
     
     @PostMapping("/set")
-    public BudgetResponse setBudget(@AuthenticationPrincipal CurrentUser user, @RequestBody SetBudgetRequest req) {
+    public BudgetResponse setBudget(@AuthenticationPrincipal CurrentUser user, @Valid @RequestBody SetBudgetRequest req) {
         return budgetService.setBudget(user.id(), req);
     }
 
