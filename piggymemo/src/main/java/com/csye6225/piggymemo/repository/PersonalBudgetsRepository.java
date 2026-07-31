@@ -8,4 +8,5 @@ import com.csye6225.piggymemo.entity.PersonalBudgets;
 
 public interface PersonalBudgetsRepository extends JpaRepository<PersonalBudgets, Long> {
     Optional<PersonalBudgets> findByUser(Long user);
+    void deleteByUser(Long user);
 }

@@ -54,6 +54,22 @@ public class BudgetService {
 
         return new SetBudgetResponse(save.getMonthlyBudget(), save.getDailyLimit(), save.getPeriodFirstDay());
     }
+
+    @Transactional
+    public void deleteBudget(Long user) {
+        Long family = profileService.getProfileFamily(user);
+
+        if(family == null) {
+            personalBudgetsRepository.deleteByUser(user);
+        }
+        else {
+            //TODO: Family owner-only deletion
+            // if(!FamilyService.isFamilyOwner())
+            // throw new FamilyBudgetAccessDeniedException("Only owner can operate family budget");
+            //familyBudgetRepository.deleteByFamily(family);
+            personalBudgetsRepository.deleteByUser(user);
+        }
+    }
         
     private Budgets findBudgetOrCreate(Long user) {
         Long family = profileService.getProfileFamily(user);
