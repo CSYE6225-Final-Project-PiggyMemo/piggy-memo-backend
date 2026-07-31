@@ -10,6 +10,7 @@ import com.csye6225.piggymemo.dto.SetBudgetRequest;
 import com.csye6225.piggymemo.dto.BudgetResponse;
 import com.csye6225.piggymemo.entity.Budgets;
 import com.csye6225.piggymemo.entity.PersonalBudgets;
+import com.csye6225.piggymemo.exception.BudgetNotExistException;
 import com.csye6225.piggymemo.exception.InvalidDailyLimitException;
 import com.csye6225.piggymemo.repository.PersonalBudgetsRepository;
 
@@ -35,9 +36,12 @@ public class BudgetService {
         BigDecimal newMonthBudget = req.getNewMonthlyBudget(),
             newDailyLimit = req.getNewDailyLimit();
         LocalDate newPeriodFirstDay = req.getNewPeriodFirstDay();
+        BigDecimal budgetDiff = null;
 
-        if(newMonthBudget != null)
+        if(newMonthBudget != null) {
+            budgetDiff = newMonthBudget.subtract(budget.getMonthlyBudget());
             budget.setMonthlyBudget(newMonthBudget);
+        }
         if(newDailyLimit != null)
             budget.setDailyLimit(newDailyLimit);
         if(newPeriodFirstDay != null)
@@ -50,9 +54,14 @@ public class BudgetService {
         ) 
         throw new InvalidDailyLimitException("Daily limit cannot be more than monthly budget");
 
+        //If budget changed, budget left will be changed as well
+        if(budgetDiff != null) {
+            budget.setBudgetLeft(budget.getBudgetLeft().add(budgetDiff));
+        }
+
         Budgets save = saveBudget(budget);
 
-        return new BudgetResponse(save.getMonthlyBudget(), save.getDailyLimit(), save.getPeriodFirstDay());
+        return new BudgetResponse(save.getMonthlyBudget(), save.getDailyLimit(), save.getPeriodFirstDay(), save.getBudgetLeft());
     }
 
     @Transactional
@@ -65,7 +74,7 @@ public class BudgetService {
                 return emptyBudget;
             });
 
-            return new BudgetResponse(budget.getMonthlyBudget(), budget.getDailyLimit(), budget.getPeriodFirstDay());
+            return new BudgetResponse(budget.getMonthlyBudget(), budget.getDailyLimit(), budget.getPeriodFirstDay(), budget.getBudgetLeft());
         }
         else {
             //TODO: Family budget logics. Notice that all members have read access.
@@ -80,7 +89,7 @@ public class BudgetService {
                 return emptyBudget;
             });
 
-            return new BudgetResponse(budget.getMonthlyBudget(), budget.getDailyLimit(), budget.getPeriodFirstDay());
+            return new BudgetResponse(budget.getMonthlyBudget(), budget.getDailyLimit(), budget.getPeriodFirstDay(), budget.getBudgetLeft());
         }
     }
 
@@ -97,6 +106,39 @@ public class BudgetService {
             // throw new FamilyBudgetAccessDeniedException("Only owner can operate family budget");
             //familyBudgetRepository.deleteByFamily(family);
             personalBudgetsRepository.deleteByUser(user);
+        }
+    }
+
+    //Change budget_left column. Positive for spending, negative for saving. Must be called when logging spending/saving.
+    protected BudgetResponse subtractBudgetLeft(Long user, BigDecimal subtraction) {
+        Long family = profileService.getProfileFamily(user);
+        if(family == null) {
+            PersonalBudgets budget = personalBudgetsRepository.findByUser(user)
+                .orElseThrow(() -> new BudgetNotExistException("Personal budget doesn't exist!"));
+            budget.setBudgetLeft(budget.getBudgetLeft().subtract(subtraction));
+            PersonalBudgets save = personalBudgetsRepository.save(budget);
+
+            return new BudgetResponse(
+                    save.getMonthlyBudget(), save.getDailyLimit(), save.getPeriodFirstDay(), save.getBudgetLeft()
+            );
+        }
+        else {
+            //TODO: Family function. All members have access to this function.
+            // FamilyBudgets budget = familyBudgetsRepository.findByFamily(family)
+            //         .orElseThrow(() -> new BudgetNotExistException("Family budget doesn't exist!"));
+            // budget.setBudgetLeft(budget.getBudgetLeft().add(addition));
+            // FamilyBudgets save = familyBudgetsRepository.save(budget);
+            // return new BudgetResponse(
+            //     budget.getMonthlyBudget(), budget.getDailyLimit(), budget.getPeriodFirstDay(), budget.getBudgetLeft()
+            // );
+            PersonalBudgets budget = personalBudgetsRepository.findByUser(user)
+                    .orElseThrow(() -> new BudgetNotExistException("Personal budget doesn't exist!"));
+            budget.setBudgetLeft(budget.getBudgetLeft().subtract(subtraction));
+            PersonalBudgets save = personalBudgetsRepository.save(budget);
+
+            return new BudgetResponse(
+                save.getMonthlyBudget(), save.getDailyLimit(), save.getPeriodFirstDay(), save.getBudgetLeft()
+            );
         }
     }
         
@@ -134,6 +176,7 @@ public class BudgetService {
         newBudget.setMonthlyBudget(new BigDecimal("100.00"));
         newBudget.setDailyLimit(new BigDecimal("100.00"));
         newBudget.setPeriodFirstDay(LocalDate.now());
+        newBudget.setBudgetLeft(new BigDecimal("100.00"));
         return newBudget;
     }
 

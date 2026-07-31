@@ -15,6 +15,9 @@ public interface Budgets {
     public BigDecimal getMonthlyBudget();
     public void setMonthlyBudget(BigDecimal monthlyBudget);
 
+    public BigDecimal getBudgetLeft();
+    public void setBudgetLeft(BigDecimal budgetLeft);
+
     public BigDecimal getDailyLimit();
     public void setDailyLimit(BigDecimal dailyLimit);
     

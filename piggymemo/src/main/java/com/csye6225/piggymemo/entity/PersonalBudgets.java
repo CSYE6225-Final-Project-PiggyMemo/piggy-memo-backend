@@ -35,6 +35,10 @@ public class PersonalBudgets implements Budgets {
     @Column(name = "monthly_budget", precision = 11, scale = 2)
     private BigDecimal monthlyBudget;
 
+    @NotNull
+    @Column(name = "budget_left")
+    private BigDecimal budgetLeft;
+
     @Column(name = "daily_limit", precision = 11, scale = 2)
     private BigDecimal dailyLimit;
 
@@ -67,6 +71,14 @@ public class PersonalBudgets implements Budgets {
 
     public void setMonthlyBudget(BigDecimal monthlyBudget) {
         this.monthlyBudget = monthlyBudget;
+    }
+
+    public BigDecimal getBudgetLeft() {
+        return budgetLeft;
+    }
+
+    public void setBudgetLeft(BigDecimal budgetLeft) {
+        this.budgetLeft = budgetLeft;
     }
 
     @Override

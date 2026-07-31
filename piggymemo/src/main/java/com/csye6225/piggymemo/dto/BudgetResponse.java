@@ -6,5 +6,6 @@ import java.time.LocalDate;
 public record BudgetResponse(
     BigDecimal currentBudget,
     BigDecimal currentDailyLimit,
-    LocalDate nextPeriodFirstDay
+    LocalDate nextPeriodFirstDay,
+    BigDecimal budgetLeft
 ) {} 
