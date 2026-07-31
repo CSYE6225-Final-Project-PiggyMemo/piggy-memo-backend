@@ -11,8 +11,8 @@ public interface Budgets {
     public OffsetDateTime getCreatedAt();
     public void setCreatedAt(OffsetDateTime createdAt);
 
-    public Long getUser();
-    public void setUser(Long user);
+    public Long getOwner();
+    public void setOwner(Long id);
 
     public BigDecimal getMonthlyBudget();
     public void setMonthlyBudget(BigDecimal monthlyBudget);

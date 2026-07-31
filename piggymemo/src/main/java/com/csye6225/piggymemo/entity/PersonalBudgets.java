@@ -31,6 +31,7 @@ public class PersonalBudgets implements Budgets {
     @Column(name = "user_id", nullable = false)
     private Long user;
 
+    @NotNull
     @Column(name = "monthly_budget", precision = 11, scale = 2)
     private BigDecimal monthlyBudget;
 
@@ -59,12 +60,11 @@ public class PersonalBudgets implements Budgets {
         this.createdAt = createdAt;
     }
 
-    @Override
-    public Long getUser() {
+    public Long getOwner() {
         return user;
     }
 
-    public void setUser(Long user) {
+    public void setOwner(Long user) {
         this.user = user;
     }
 

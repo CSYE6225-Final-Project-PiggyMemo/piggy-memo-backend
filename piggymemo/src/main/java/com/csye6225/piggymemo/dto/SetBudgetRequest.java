@@ -15,6 +15,7 @@ public class SetBudgetRequest {
     private BigDecimal newMonthlyBudget;
 
     @Digits(integer = 9, fraction = 2, message = "Invalid amount for daily limit")
+    @PositiveOrZero(message = "Daily limit cannot be negative")
     private BigDecimal newDailyLimit;
 
     @FutureOrPresent(message = "First day of period cannot be earlier than today")

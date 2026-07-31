@@ -1,8 +1,10 @@
 package com.csye6225.piggymemo.service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.csye6225.piggymemo.dto.SetBudgetRequest;
 import com.csye6225.piggymemo.dto.SetBudgetResponse;
@@ -24,41 +26,77 @@ public class BudgetService {
         this.profileService = profileService;
     }
 
+    @Transactional
     public SetBudgetResponse setBudget(
         Long user, SetBudgetRequest req
     ){
         Budgets budget = findBudgetOrCreate(user);
-        BigDecimal
-            currMonthBudget = budget.getMonthlyBudget(),
-            newMonthBudget = req.getNewMonthlyBudget(),
-            currDailyLimit = budget.getDailyLimit(),
+
+        BigDecimal newMonthBudget = req.getNewMonthlyBudget(),
             newDailyLimit = req.getNewDailyLimit();
-        if()
-        
-        if(newMonthBudget != null) {
-            if(req.getNewDailyLimit().compareTo(newMonthBudget) > 0)
-                throw new InvalidDailyLimitException("Daily limit can't be more than monthly budget!");
+        LocalDate newPeriodFirstDay = req.getNewPeriodFirstDay();
 
-        }
-        else if(currMonthBudget != null) {
-            if()
-        }
+        if(newMonthBudget != null)
+            budget.setMonthlyBudget(newMonthBudget);
+        if(newDailyLimit != null)
+            budget.setDailyLimit(newDailyLimit);
+        if(newPeriodFirstDay != null)
+            budget.setPeriodFirstDay(newPeriodFirstDay);
 
+        if(
+            budget.getDailyLimit() != null &&
+            budget.getMonthlyBudget() != null &&
+            budget.getDailyLimit().compareTo(budget.getMonthlyBudget()) > 0
+        ) 
+        throw new InvalidDailyLimitException("Daily limit cannot be more than monthly budget");
 
+        Budgets save = saveBudget(budget);
+
+        return new SetBudgetResponse(save.getMonthlyBudget(), save.getDailyLimit(), save.getPeriodFirstDay());
     }
         
-
     private Budgets findBudgetOrCreate(Long user) {
         Long family = profileService.getProfileFamily(user);
 
         if(family == null) {
-            return personalBudgetsRepository.findByUser(user).orElseGet(() -> new PersonalBudgets());
+            return personalBudgetsRepository.findByUser(user)
+                .orElseGet(() -> {
+                    PersonalBudgets newBudget = new PersonalBudgets();
+                    newBudget = (PersonalBudgets)setDefaultBudget(user, newBudget);
+                    return newBudget;
+                });
         }
         else {
             //TODO: Family budget implementation and family-owner-only write privilege
             //if(!FamilyService.isFamilyOwner()) 
             // throw new FamilyBudgetAccessDeniedException("Only owner can operate family budget");
-            //familyBudgetRepository.findByFamily(family).orElseGet(() -> new FamilyBudgets());
+            //familyBudgetsRepository.findByFamily(family)
+            // .orElseGet(() -> {
+            //  FamilyBudgets newBudget = new FamilyBudgets();
+            //  newBudget = (FamilyBudgets)setDefaultBudget(family, newBudget);
+            //  return newBudget;
+            //  });
+            return personalBudgetsRepository.findByUser(user).orElseGet(() -> {
+                PersonalBudgets newBudget = new PersonalBudgets();
+                newBudget = (PersonalBudgets) setDefaultBudget(user, newBudget);
+                return newBudget;
+            });
         }
+    }
+
+    private Budgets setDefaultBudget(Long owner, Budgets newBudget) {
+        newBudget.setOwner(owner);
+        newBudget.setMonthlyBudget(new BigDecimal("100.00"));
+        newBudget.setDailyLimit(new BigDecimal("100.00"));
+        newBudget.setPeriodFirstDay(LocalDate.now());
+        return newBudget;
+    }
+
+    private Budgets saveBudget(Budgets budget) {
+        if(budget instanceof PersonalBudgets)
+            return personalBudgetsRepository.save((PersonalBudgets)budget);
+        else
+            //TODO: return familyBudgetsRepository.save((FamilyBudgets) budget);
+            return personalBudgetsRepository.save((PersonalBudgets) budget);
     }
 }
