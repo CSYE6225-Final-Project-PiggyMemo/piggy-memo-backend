@@ -6,10 +6,8 @@ import java.time.OffsetDateTime;
 
 public interface Budgets {
     public Long getId();
-    public void setId(Long id);
 
     public OffsetDateTime getCreatedAt();
-    public void setCreatedAt(OffsetDateTime createdAt);
 
     public Long getOwner();
     public void setOwner(Long id);

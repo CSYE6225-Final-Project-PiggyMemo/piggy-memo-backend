@@ -29,10 +29,6 @@ public class TokenBlacklist {
         return id;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
     public String getJti() {
         return jti;
     }

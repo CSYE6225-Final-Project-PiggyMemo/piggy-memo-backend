@@ -40,10 +40,6 @@ public class Profile {
         return id;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
     public Long getUser() {
         return user;
     }
