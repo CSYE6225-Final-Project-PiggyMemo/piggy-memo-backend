@@ -38,7 +38,7 @@ public class BudgetController {
     
     
     @DeleteMapping("/remove")
-    public ResponseEntity<Void> deleteBudget(@AuthenticationPrincipal CurrentUser user, @RequestBody String req) {
+    public ResponseEntity<Void> deleteBudget(@AuthenticationPrincipal CurrentUser user) {
         budgetService.deleteBudget(user.id());
         return ResponseEntity.noContent().build();
     }
