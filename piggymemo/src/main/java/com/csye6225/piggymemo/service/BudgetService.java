@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.csye6225.piggymemo.dto.SetBudgetRequest;
-import com.csye6225.piggymemo.dto.SetBudgetResponse;
+import com.csye6225.piggymemo.dto.BudgetResponse;
 import com.csye6225.piggymemo.entity.Budgets;
 import com.csye6225.piggymemo.entity.PersonalBudgets;
 import com.csye6225.piggymemo.exception.InvalidDailyLimitException;
@@ -27,7 +27,7 @@ public class BudgetService {
     }
 
     @Transactional
-    public SetBudgetResponse setBudget(
+    public BudgetResponse setBudget(
         Long user, SetBudgetRequest req
     ){
         Budgets budget = findBudgetOrCreate(user);
@@ -52,7 +52,7 @@ public class BudgetService {
 
         Budgets save = saveBudget(budget);
 
-        return new SetBudgetResponse(save.getMonthlyBudget(), save.getDailyLimit(), save.getPeriodFirstDay());
+        return new BudgetResponse(save.getMonthlyBudget(), save.getDailyLimit(), save.getPeriodFirstDay());
     }
 
     @Transactional
