@@ -1,8 +1,8 @@
 package com.csye6225.piggymemo.controller;
 
 import com.csye6225.piggymemo.dto.ProfileUpdateRequest;
-import com.csye6225.piggymemo.entity.CurrentUser;
 import com.csye6225.piggymemo.entity.Profile;
+import com.csye6225.piggymemo.security.CurrentUser;
 import com.csye6225.piggymemo.service.ProfileService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;

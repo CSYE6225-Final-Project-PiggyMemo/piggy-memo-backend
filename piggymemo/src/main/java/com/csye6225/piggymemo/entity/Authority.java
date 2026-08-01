@@ -25,10 +25,6 @@ public class Authority {
         return id;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
     public String getIdentity() {
         return identity;
     }
@@ -44,5 +40,4 @@ public class Authority {
     public void setUid(Long uid) {
         this.uid = uid;
     }
-
 }

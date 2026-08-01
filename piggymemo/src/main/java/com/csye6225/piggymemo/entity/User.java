@@ -37,10 +37,6 @@ public class User {
         return id;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
     public String getUsername() {
         return username;
     }
@@ -59,9 +55,5 @@ public class User {
 
     public OffsetDateTime getCreatedAt() {
         return createdAt;
-    }
-
-    public void setCreatedAt(OffsetDateTime createdAt) {
-        this.createdAt = createdAt;
     }
 }

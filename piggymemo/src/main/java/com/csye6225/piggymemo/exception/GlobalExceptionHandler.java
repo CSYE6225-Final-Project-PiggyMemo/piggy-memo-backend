@@ -37,4 +37,22 @@ public class GlobalExceptionHandler {
         
         return Map.of("message", message);
     }
+
+    @ExceptionHandler(InvalidDailyLimitException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Map<String, String> handleInvalidDailyLimit(InvalidDailyLimitException e) {
+        return Map.of("message", e.getMessage());
+    }
+
+    @ExceptionHandler(FamilyBudgetAccessDeniedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public Map<String, String> handleFamilyBudgetAccessDenied(FamilyBudgetAccessDeniedException e) {
+        return Map.of("message", e.getMessage());
+    }
+
+    @ExceptionHandler(BudgetNotExistException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public Map<String, String> handleBudgetNotExist(BudgetNotExistException e) {
+        return Map.of("message", e.getMessage());
+    }
 }
