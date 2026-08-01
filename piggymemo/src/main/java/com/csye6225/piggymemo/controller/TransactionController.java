@@ -40,9 +40,9 @@ public class TransactionController {
     @GetMapping("/get")
     public PagedTransactionResponse getTransRecord(
         @AuthenticationPrincipal CurrentUser user,
-        @RequestParam Integer length,
-        @RequestParam Integer page
+        @RequestParam Integer size,
+        @RequestParam Integer pageNumber
     ) {
-        return spendingService.getTransactionRecord(user.id(), length, page);
+        return spendingService.getTransactionRecord(user.id(), size, pageNumber);
     }
 }
