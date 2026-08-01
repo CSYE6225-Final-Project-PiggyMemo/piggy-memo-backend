@@ -49,4 +49,10 @@ public class GlobalExceptionHandler {
     public Map<String, String> handleFamilyBudgetAccessDenied(FamilyBudgetAccessDeniedException e) {
         return Map.of("message", e.getMessage());
     }
+
+    @ExceptionHandler(BudgetNotExistException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public Map<String, String> handleBudgetNotExist(BudgetNotExistException e) {
+        return Map.of("message", e.getMessage());
+    }
 }

@@ -29,6 +29,9 @@ public class Spendings {
     @Column(nullable = false, precision = 11, scale = 2)
     private BigDecimal amount;
 
+    @Column(name = "budget_left_now", precision = 11, scale = 2)
+    private BigDecimal budgetLeftNow;
+
     @Column
     private String category;
 
@@ -61,6 +64,14 @@ public class Spendings {
 
     public void setAmount(BigDecimal amount) {
         this.amount = amount;
+    }
+
+    public BigDecimal getBudgetLeftNow() {
+        return budgetLeftNow;
+    }
+
+    public void setBudgetLeftNow(BigDecimal budgetLeftNow) {
+        this.budgetLeftNow = budgetLeftNow;
     }
 
     public String getCategory() {
