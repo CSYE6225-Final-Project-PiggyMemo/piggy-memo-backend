@@ -26,7 +26,7 @@ public class Spendings {
     private Long userId;
 
     @NotNull
-    @Column(nullable = false)
+    @Column(nullable = false, precision = 11, scale = 2)
     private BigDecimal amount;
 
     @Column
