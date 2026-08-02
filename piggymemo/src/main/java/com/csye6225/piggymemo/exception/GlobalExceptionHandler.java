@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.transaction.UnexpectedRollbackException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -53,6 +54,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BudgetNotExistException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public Map<String, String> handleBudgetNotExist(BudgetNotExistException e) {
+        return Map.of("message", e.getMessage());
+    }
+
+    @ExceptionHandler(UnexpectedRollbackException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public Map<String, String> handleUnexpecterRollback(UnexpectedRollbackException e) {
         return Map.of("message", e.getMessage());
     }
 }
