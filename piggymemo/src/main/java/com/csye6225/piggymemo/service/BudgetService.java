@@ -110,7 +110,7 @@ public class BudgetService {
     }
 
     //Change budget_left column. Positive for spending, negative for saving. Must be called when logging spending/saving.
-    @Transactional
+    @Transactional(noRollbackFor = BudgetNotExistException.class)
     protected BudgetResponse subtractBudgetLeft(Long user, BigDecimal subtraction) {
         Long family = profileService.getProfileFamily(user);
         if(family == null) {
