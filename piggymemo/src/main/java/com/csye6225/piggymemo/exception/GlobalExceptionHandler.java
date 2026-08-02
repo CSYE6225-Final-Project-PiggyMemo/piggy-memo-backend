@@ -57,8 +57,8 @@ public class GlobalExceptionHandler {
         return Map.of("message", e.getMessage());
     }
 
-    @ExceptionHandler(UnexpectedRollbackException.class)
-    public Map<String, String> handleRollBack(UnexpectedRollbackException e) {
-        return Map.of("message", e.getMessage());
-    }
+    // @ExceptionHandler(UnexpectedRollbackException.class)
+    // public Map<String, String> handleRollBack(UnexpectedRollbackException e) {
+    //     return Map.of("message", e.getMessage());
+    // }
 }
