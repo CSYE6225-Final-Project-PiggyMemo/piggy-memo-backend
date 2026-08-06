@@ -62,4 +62,52 @@ public class GlobalExceptionHandler {
     public Map<String, String> handleUnexpecterRollback(UnexpectedRollbackException e) {
         return Map.of("message", e.getMessage());
     }
+
+    @ExceptionHandler(FamilyNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public Map<String, String> handleFamilyNotFound(FamilyNotFoundException e) {
+        return Map.of("message", e.getMessage());
+    }
+
+    @ExceptionHandler(InvalidFamilyCodeException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public Map<String, String> handleInvalidFamilyCode(InvalidFamilyCodeException e) {
+        return Map.of("message", e.getMessage());
+    }
+
+    @ExceptionHandler(AlreadyInFamilyException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public Map<String, String> handleAlreadyInFamily(AlreadyInFamilyException e) {
+        return Map.of("message", e.getMessage());
+    }
+
+    @ExceptionHandler(NotInFamilyException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Map<String, String> handleNotInFamily(NotInFamilyException e) {
+        return Map.of("message", e.getMessage());
+    }
+
+    @ExceptionHandler(JoinRequestNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public Map<String, String> handleJoinRequestNotFound(JoinRequestNotFoundException e) {
+        return Map.of("message", e.getMessage());
+    }
+
+    @ExceptionHandler(FamilyPermissionDeniedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public Map<String, String> handleFamilyPermissionDenied(FamilyPermissionDeniedException e) {
+        return Map.of("message", e.getMessage());
+    }
+
+    @ExceptionHandler(FamilyOwnerCannotLeaveException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public Map<String, String> handleFamilyOwnerCannotLeave(FamilyOwnerCannotLeaveException e) {
+        return Map.of("message", e.getMessage());
+    }
+
+    @ExceptionHandler(FamilyMemberNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public Map<String, String> handleFamilyMemberNotFound(FamilyMemberNotFoundException e) {
+        return Map.of("message", e.getMessage());
+    }
 }

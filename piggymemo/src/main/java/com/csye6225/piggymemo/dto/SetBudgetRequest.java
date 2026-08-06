@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.FutureOrPresent;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 
 public class SetBudgetRequest {
@@ -15,7 +16,7 @@ public class SetBudgetRequest {
     private BigDecimal newMonthlyBudget;
 
     @Digits(integer = 9, fraction = 2, message = "Invalid amount for daily limit")
-    @PositiveOrZero(message = "Daily limit cannot be negative")
+    @Positive(message = "Daily limit must be greater than zero")
     private BigDecimal newDailyLimit;
 
     @FutureOrPresent(message = "First day of period cannot be earlier than today")

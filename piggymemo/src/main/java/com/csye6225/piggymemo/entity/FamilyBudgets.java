@@ -1,0 +1,102 @@
+package com.csye6225.piggymemo.entity;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+
+import org.hibernate.annotations.Generated;
+import org.hibernate.generator.EventType;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
+
+@Entity
+@Table(name = "family_budgets")
+public class FamilyBudgets implements Budgets {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "budget_id")
+    private Long id;
+
+    @Generated(event = EventType.INSERT)
+    @Column(name = "created_at", insertable = false, updatable = false)
+    private OffsetDateTime createdAt;
+
+    @NotNull
+    @Column(name = "family_id", nullable = false, unique = true)
+    private Long family;
+
+    @NotNull
+    @Column(name = "monthly_budget", precision = 11, scale = 2)
+    private BigDecimal monthlyBudget;
+
+    @NotNull
+    @Column(name = "budget_left")
+    private BigDecimal budgetLeft;
+
+    @Column(name = "daily_limit", precision = 11, scale = 2)
+    private BigDecimal dailyLimit;
+
+    @NotNull
+    @Column(name = "period_first_day", nullable = false)
+    private LocalDate periodFirstDay;
+
+    @Override
+    public Long getId() {
+        return id;
+    }
+
+    @Override
+    public OffsetDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public Long getOwner() {
+        return family;
+    }
+
+    public void setOwner(Long family) {
+        this.family = family;
+    }
+
+    @Override
+    public BigDecimal getMonthlyBudget() {
+        return monthlyBudget;
+    }
+
+    public void setMonthlyBudget(BigDecimal monthlyBudget) {
+        this.monthlyBudget = monthlyBudget;
+    }
+
+    public BigDecimal getBudgetLeft() {
+        return budgetLeft;
+    }
+
+    public void setBudgetLeft(BigDecimal budgetLeft) {
+        this.budgetLeft = budgetLeft;
+    }
+
+    @Override
+    public BigDecimal getDailyLimit() {
+        return dailyLimit;
+    }
+
+    public void setDailyLimit(BigDecimal dailyLimit) {
+        this.dailyLimit = dailyLimit;
+    }
+
+    @Override
+    public LocalDate getPeriodFirstDay() {
+        return periodFirstDay;
+    }
+
+    public void setPeriodFirstDay(LocalDate periodFirstDay) {
+        this.periodFirstDay = periodFirstDay;
+    }
+
+}
