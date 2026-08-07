@@ -2,6 +2,7 @@ package com.csye6225.piggymemo.service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -82,12 +83,16 @@ public class BudgetService {
                 PersonalBudgets emptyBudget = new PersonalBudgets();
                 return emptyBudget;
             });
+            if(rollOverIfNeeded(budget) && budget.getId() != null)
+                budget = personalBudgetsRepository.save(budget);
 
             return new BudgetResponse(budget.getMonthlyBudget(), budget.getDailyLimit(), budget.getPeriodFirstDay(), budget.getBudgetLeft());
         }
         else {
             //Any family member has read access to the family budget.
             FamilyBudgets budget = familyBudgetsRepository.findByFamily(family).orElseGet(FamilyBudgets::new);
+            if(rollOverIfNeeded(budget) && budget.getId() != null)
+                budget = familyBudgetsRepository.save(budget);
 
             return new BudgetResponse(budget.getMonthlyBudget(), budget.getDailyLimit(), budget.getPeriodFirstDay(), budget.getBudgetLeft());
         }
@@ -114,6 +119,7 @@ public class BudgetService {
         if(family == null) {
             PersonalBudgets budget = personalBudgetsRepository.findByUser(user)
                 .orElseThrow(() -> new BudgetNotExistException("Personal budget doesn't exist!"));
+            rollOverIfNeeded(budget);
             budget.setBudgetLeft(budget.getBudgetLeft().subtract(subtraction));
             PersonalBudgets save = personalBudgetsRepository.save(budget);
 
@@ -125,6 +131,7 @@ public class BudgetService {
             //Any family member may log spending, so any member may reach this branch.
             FamilyBudgets budget = familyBudgetsRepository.findByFamily(family)
                     .orElseThrow(() -> new BudgetNotExistException("Family budget doesn't exist!"));
+            rollOverIfNeeded(budget);
             budget.setBudgetLeft(budget.getBudgetLeft().subtract(subtraction));
             FamilyBudgets save = familyBudgetsRepository.save(budget);
 
@@ -138,22 +145,44 @@ public class BudgetService {
         Long family = profileService.getProfileFamily(user);
 
         if(family == null) {
-            return personalBudgetsRepository.findByUser(user)
+            Budgets budget = personalBudgetsRepository.findByUser(user)
                 .orElseGet(() -> {
                     PersonalBudgets newBudget = new PersonalBudgets();
                     newBudget = (PersonalBudgets)setDefaultBudget(user, newBudget);
                     return newBudget;
                 });
+            rollOverIfNeeded(budget);
+            return budget;
         }
         else {
             if(!familyService.isFamilyOwner(user, family))
                 throw new FamilyBudgetAccessDeniedException("Only the family owner can set the family budget");
-            return familyBudgetsRepository.findByFamily(family).orElseGet(() -> {
+            Budgets budget = familyBudgetsRepository.findByFamily(family).orElseGet(() -> {
                 FamilyBudgets newBudget = new FamilyBudgets();
                 newBudget = (FamilyBudgets) setDefaultBudget(family, newBudget);
                 return newBudget;
             });
+            rollOverIfNeeded(budget);
+            return budget;
         }
+    }
+
+    //Advances the period to the most recent monthly anniversary of its start day that
+    //isn't in the future, and resets budgetLeft to the full monthlyBudget, whenever at
+    //least one full month has elapsed since the last recorded period start. A no-op for
+    //a brand-new/never-set-up budget (periodFirstDay is null) or one whose period hasn't
+    //rolled over yet.
+    private boolean rollOverIfNeeded(Budgets budget) {
+        LocalDate periodStart = budget.getPeriodFirstDay();
+        if(periodStart == null) return false;
+
+        LocalDate today = LocalDate.now();
+        if(today.isBefore(periodStart.plusMonths(1))) return false;
+
+        long monthsElapsed = ChronoUnit.MONTHS.between(periodStart, today);
+        budget.setPeriodFirstDay(periodStart.plusMonths(monthsElapsed));
+        budget.setBudgetLeft(budget.getMonthlyBudget());
+        return true;
     }
 
     private Budgets setDefaultBudget(Long owner, Budgets newBudget) {

@@ -1,13 +1,10 @@
 package com.csye6225.piggymemo.service;
 
 import com.csye6225.piggymemo.dto.BudgetExecution;
+import com.csye6225.piggymemo.dto.BudgetResponse;
 import com.csye6225.piggymemo.dto.DailySpending;
 import com.csye6225.piggymemo.dto.FamilyMemberDailySpending;
 import com.csye6225.piggymemo.dto.OverviewDashboardResponse;
-import com.csye6225.piggymemo.entity.FamilyBudgets;
-import com.csye6225.piggymemo.entity.PersonalBudgets;
-import com.csye6225.piggymemo.repository.FamilyBudgetsRepository;
-import com.csye6225.piggymemo.repository.PersonalBudgetsRepository;
 import com.csye6225.piggymemo.repository.SpendingsRepository;
 import org.springframework.stereotype.Service;
 
@@ -19,40 +16,39 @@ import java.util.List;
 public class DashboardService {
     private static final ZoneId ZONE_ID = ZoneId.of("America/New_York");
 
-    private final PersonalBudgetsRepository personalBudgetsRepository;
-    private final FamilyBudgetsRepository familyBudgetsRepository;
     private final SpendingsRepository spendingsRepository;
     private final ProfileService profileService;
+    private final BudgetService budgetService;
 
     public DashboardService(
-        PersonalBudgetsRepository personalBudgetsRepository,
-        FamilyBudgetsRepository familyBudgetsRepository,
         SpendingsRepository spendingsRepository,
-        ProfileService profileService
+        ProfileService profileService,
+        BudgetService budgetService
     ) {
-        this.personalBudgetsRepository = personalBudgetsRepository;
-        this.familyBudgetsRepository = familyBudgetsRepository;
         this.spendingsRepository = spendingsRepository;
         this.profileService = profileService;
+        this.budgetService = budgetService;
     }
 
     public OverviewDashboardResponse getOverview(Long userId) {
         Long family = profileService.getProfileFamily(userId);
 
+        // Routing through BudgetService (instead of querying the budget repositories
+        // directly) means the dashboard always reflects the same rolled-over period /
+        // reset budgetLeft that BudgetService.getBudget() would return.
+        BudgetResponse budgetResponse = budgetService.getBudget(userId);
+        BudgetExecution budgetExecution = new BudgetExecution(budgetResponse.currentBudget(), budgetResponse.budgetLeft());
+
         ZonedDateTime monthStart = ZonedDateTime.now(ZONE_ID).withDayOfMonth(1).toLocalDate().atStartOfDay(ZONE_ID);
         ZonedDateTime nextMonthStart = monthStart.plusMonths(1);
 
         if (family == null) {
-            PersonalBudgets budget = personalBudgetsRepository.findByUser(userId).orElseGet(PersonalBudgets::new);
-            BudgetExecution budgetExecution = new BudgetExecution(budget.getMonthlyBudget(), budget.getBudgetLeft());
             List<DailySpending> monthSpending = spendingsRepository.findDailySpendingByMonth(
                 userId, monthStart.toOffsetDateTime(), nextMonthStart.toOffsetDateTime(), ZONE_ID.getId()
             );
             return new OverviewDashboardResponse(budgetExecution, monthSpending, List.of());
         }
 
-        FamilyBudgets budget = familyBudgetsRepository.findByFamily(family).orElseGet(FamilyBudgets::new);
-        BudgetExecution budgetExecution = new BudgetExecution(budget.getMonthlyBudget(), budget.getBudgetLeft());
         List<DailySpending> monthSpending = spendingsRepository.findDailySpendingByMonthForFamily(
             family, monthStart.toOffsetDateTime(), nextMonthStart.toOffsetDateTime(), ZONE_ID.getId()
         );
