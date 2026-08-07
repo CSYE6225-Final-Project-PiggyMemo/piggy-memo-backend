@@ -53,7 +53,7 @@ public class ProfileService {
         return profileRepository.save(profile);
     }
 
-    private Profile getOrCreateProfile(Long userId) {
+    protected Profile getOrCreateProfile(Long userId) {
         return profileRepository.findByUser(userId).orElseGet(() -> {
             User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
             return createDefaultProfile(userId, user.getUsername());

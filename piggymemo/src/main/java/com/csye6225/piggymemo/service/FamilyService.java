@@ -79,6 +79,11 @@ public class FamilyService {
         Family family = familyRepository.findByFamilyCode(normalizeCode(familyCode))
             .orElseThrow(() -> new InvalidFamilyCodeException("No family found for this code"));
 
+        // Ensure the requester has a profile row now, so the owner's pending-requests
+        // list can show a real nickname instead of a blank name (a brand-new user who
+        // never visited /profile wouldn't have one otherwise).
+        profileService.getOrCreateProfile(userId);
+
         familyJoinRequestRepository.deleteByUserId(userId); // at most one pending request per user
 
         FamilyJoinRequest joinRequest = new FamilyJoinRequest();
