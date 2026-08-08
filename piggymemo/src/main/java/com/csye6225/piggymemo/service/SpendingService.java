@@ -21,13 +21,16 @@ import com.csye6225.piggymemo.repository.SpendingsRepository;
 public class SpendingService {
     private final SpendingsRepository spendingRepository;
     private final BudgetService budgetService;
+    private final ProfileService profileService;
 
     public SpendingService(
         SpendingsRepository spendingRepository,
-        BudgetService budgetService
+        BudgetService budgetService,
+        ProfileService profileService
     ){
         this.spendingRepository = spendingRepository;
         this.budgetService = budgetService;
+        this.profileService = profileService;
     }
 
     @Transactional
@@ -38,6 +41,7 @@ public class SpendingService {
         spending.setAmount(req.getTransactionAmount());
         String category = req.getCategory().getRecord();
         spending.setCategory(category);
+        spending.setFamilyId(profileService.getProfileFamily(user)); // null for personal spending
 
         if(req.getNotes() != null)
             spending.setNotes(req.getNotes());
@@ -51,19 +55,24 @@ public class SpendingService {
         }
         Spendings save = spendingRepository.save(spending);
 
-        return new TransactionResponse(save.getAmount(), save.getBudgetLeftNow(), save.getCategory(), save.getNotes(), save.getCreatedAt());
+        return toResponse(save);
     }
 
     public PagedTransactionResponse getTransactionRecord(Long user, Integer size, Integer pageNumber) {
         Pageable pageable = PageRequest.of(pageNumber, size);
+        Long family = profileService.getProfileFamily(user);
 
-        Page<Spendings> page = spendingRepository.findByUserIdOrderByCreatedAtDesc(user, pageable);
-        List<TransactionResponse> records = page.stream().map(
-            sp -> new TransactionResponse(
-                sp.getAmount(), sp.getBudgetLeftNow(), sp.getCategory(), sp.getNotes(), sp.getCreatedAt()
-            )
-        ).toList();
+        Page<Spendings> page = (family == null)
+            ? spendingRepository.findByUserIdAndFamilyIdIsNullOrderByCreatedAtDesc(user, pageable)
+            : spendingRepository.findByFamilyIdOrderByCreatedAtDesc(family, pageable);
+        List<TransactionResponse> records = page.stream().map(this::toResponse).toList();
 
         return new PagedTransactionResponse(records, page.getNumber(), page.getTotalPages(), page.getTotalElements());
+    }
+
+    private TransactionResponse toResponse(Spendings sp) {
+        return new TransactionResponse(
+            sp.getAmount(), sp.getBudgetLeftNow(), sp.getCategory(), sp.getNotes(), sp.getCreatedAt(), sp.getUserId()
+        );
     }
 }

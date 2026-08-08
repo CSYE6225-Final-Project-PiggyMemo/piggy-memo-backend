@@ -21,8 +21,9 @@ public class Spendings {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull
-    @Column(name = "user_id",nullable = false)
+    // Nullable: survives the owning user's account deletion (ON DELETE SET NULL),
+    // rather than the row being cascade-deleted, so family/history data isn't lost.
+    @Column(name = "user_id")
     private Long userId;
 
     @NotNull
@@ -37,6 +38,9 @@ public class Spendings {
 
     @Column
     private String notes;
+
+    @Column(name = "family_id")
+    private Long familyId;
 
     @Generated(event = EventType.INSERT)
     @Column(name = "created_at", insertable = false, updatable = false)
@@ -88,6 +92,14 @@ public class Spendings {
 
     public void setNotes(String notes) {
         this.notes = notes;
+    }
+
+    public Long getFamilyId() {
+        return familyId;
+    }
+
+    public void setFamilyId(Long familyId) {
+        this.familyId = familyId;
     }
 
     public OffsetDateTime getCreatedAt() {

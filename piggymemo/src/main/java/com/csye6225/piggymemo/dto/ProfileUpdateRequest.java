@@ -4,7 +4,6 @@ public record ProfileUpdateRequest(
     String avatarUrl,
     String nickname,
     String bio,
-    Boolean isProfilePublic,
-    Long family
+    Boolean isProfilePublic
 ) {
 }

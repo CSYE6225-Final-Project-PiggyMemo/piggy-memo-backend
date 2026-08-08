@@ -1,17 +1,23 @@
 package com.csye6225.piggymemo.service;
 
+import java.util.List;
+
 import com.csye6225.piggymemo.dto.ProfileUpdateRequest;
 import com.csye6225.piggymemo.entity.Profile;
+import com.csye6225.piggymemo.entity.User;
 import com.csye6225.piggymemo.repository.ProfileRepository;
+import com.csye6225.piggymemo.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ProfileService {
     private final ProfileRepository profileRepository;
+    private final UserRepository userRepository;
 
-    public ProfileService(ProfileRepository profileRepository) {
+    public ProfileService(ProfileRepository profileRepository, UserRepository userRepository) {
         this.profileRepository = profileRepository;
+        this.userRepository = userRepository;
     }
 
     @Transactional
@@ -30,14 +36,36 @@ public class ProfileService {
             profile.setBio(request.bio());
         if(request.isProfilePublic() != null)
             profile.setIsProfilePublic(request.isProfilePublic());
-        if(request.family() != null)
-            profile.setFamily(request.family());
         return profileRepository.save(profile);
     }
 
+    // No profile row yet (e.g. a just-registered user who hasn't visited /profile,
+    // which is what lazily creates it) simply means "not in a family" — never throw here.
     protected Long getProfileFamily(Long id) {
-        Profile profile = profileRepository.findByUser(id).orElseThrow(() -> new RuntimeException("Profile not found"));
-        return profile.getFamily();
+        return profileRepository.findByUser(id).map(Profile::getFamily).orElse(null);
+    }
+
+    //Family membership can only change via FamilyService's governed create/join/approve/leave/remove flows.
+    @Transactional
+    protected Profile setProfileFamily(Long userId, Long familyId) {
+        Profile profile = getOrCreateProfile(userId);
+        profile.setFamily(familyId);
+        return profileRepository.save(profile);
+    }
+
+    protected Profile getOrCreateProfile(Long userId) {
+        return profileRepository.findByUser(userId).orElseGet(() -> {
+            User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+            return createDefaultProfile(userId, user.getUsername());
+        });
+    }
+
+    protected List<Profile> getFamilyMembers(Long familyId) {
+        return profileRepository.findAllByFamily(familyId);
+    }
+
+    protected List<Profile> getProfilesByUsers(List<Long> userIds) {
+        return profileRepository.findAllByUserIn(userIds);
     }
 
     private Profile createDefaultProfile(Long id, String username) {

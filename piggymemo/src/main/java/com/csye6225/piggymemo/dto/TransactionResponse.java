@@ -4,5 +4,5 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
 public record TransactionResponse(
-    BigDecimal amount, BigDecimal budgetLeftNow, String category, String notes, OffsetDateTime time
+    BigDecimal amount, BigDecimal budgetLeftNow, String category, String notes, OffsetDateTime time, Long userId
 ) {}

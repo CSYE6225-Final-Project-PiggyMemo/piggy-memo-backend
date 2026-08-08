@@ -2,6 +2,7 @@ package com.csye6225.piggymemo.service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -9,22 +10,31 @@ import org.springframework.transaction.annotation.Transactional;
 import com.csye6225.piggymemo.dto.SetBudgetRequest;
 import com.csye6225.piggymemo.dto.BudgetResponse;
 import com.csye6225.piggymemo.entity.Budgets;
+import com.csye6225.piggymemo.entity.FamilyBudgets;
 import com.csye6225.piggymemo.entity.PersonalBudgets;
 import com.csye6225.piggymemo.exception.BudgetNotExistException;
+import com.csye6225.piggymemo.exception.FamilyBudgetAccessDeniedException;
 import com.csye6225.piggymemo.exception.InvalidDailyLimitException;
+import com.csye6225.piggymemo.repository.FamilyBudgetsRepository;
 import com.csye6225.piggymemo.repository.PersonalBudgetsRepository;
 
 @Service
 public class BudgetService {
     private final PersonalBudgetsRepository personalBudgetsRepository;
+    private final FamilyBudgetsRepository familyBudgetsRepository;
     private final ProfileService profileService;
+    private final FamilyService familyService;
 
     public BudgetService(
         PersonalBudgetsRepository personalBudgetsRepository,
-        ProfileService profileService
+        FamilyBudgetsRepository familyBudgetsRepository,
+        ProfileService profileService,
+        FamilyService familyService
     ){
         this.personalBudgetsRepository = personalBudgetsRepository;
+        this.familyBudgetsRepository = familyBudgetsRepository;
         this.profileService = profileService;
+        this.familyService = familyService;
     }
 
     @Transactional
@@ -73,21 +83,16 @@ public class BudgetService {
                 PersonalBudgets emptyBudget = new PersonalBudgets();
                 return emptyBudget;
             });
+            if(rollOverIfNeeded(budget) && budget.getId() != null)
+                budget = personalBudgetsRepository.save(budget);
 
             return new BudgetResponse(budget.getMonthlyBudget(), budget.getDailyLimit(), budget.getPeriodFirstDay(), budget.getBudgetLeft());
         }
         else {
-            //TODO: Family budget logics. Notice that all members have read access.
-            // FamilyBudgets budget = familyBudgetsRepository.findByFamily(family).orElseGet(() -> {
-            //     FamilyBudgets emptyBudget = new FamilyBudgets();
-            //     return emptyBudget;
-            // });
-            //
-            // return new BudgetResponse(budget.getMonthlyBudget(), budget.getDailyLimit(), budget.getPeriodFirstDay());
-            PersonalBudgets budget = personalBudgetsRepository.findByUser(user).orElseGet(() -> {
-                PersonalBudgets emptyBudget = new PersonalBudgets();
-                return emptyBudget;
-            });
+            //Any family member has read access to the family budget.
+            FamilyBudgets budget = familyBudgetsRepository.findByFamily(family).orElseGet(FamilyBudgets::new);
+            if(rollOverIfNeeded(budget) && budget.getId() != null)
+                budget = familyBudgetsRepository.save(budget);
 
             return new BudgetResponse(budget.getMonthlyBudget(), budget.getDailyLimit(), budget.getPeriodFirstDay(), budget.getBudgetLeft());
         }
@@ -101,11 +106,9 @@ public class BudgetService {
             personalBudgetsRepository.deleteByUser(user);
         }
         else {
-            //TODO: Family owner-only deletion
-            // if(!FamilyService.isFamilyOwner())
-            // throw new FamilyBudgetAccessDeniedException("Only owner can operate family budget");
-            //familyBudgetRepository.deleteByFamily(family);
-            personalBudgetsRepository.deleteByUser(user);
+            if(!familyService.isFamilyOwner(user, family))
+                throw new FamilyBudgetAccessDeniedException("Only the family owner can delete the family budget");
+            familyBudgetsRepository.deleteByFamily(family);
         }
     }
 
@@ -116,6 +119,7 @@ public class BudgetService {
         if(family == null) {
             PersonalBudgets budget = personalBudgetsRepository.findByUser(user)
                 .orElseThrow(() -> new BudgetNotExistException("Personal budget doesn't exist!"));
+            rollOverIfNeeded(budget);
             budget.setBudgetLeft(budget.getBudgetLeft().subtract(subtraction));
             PersonalBudgets save = personalBudgetsRepository.save(budget);
 
@@ -124,18 +128,12 @@ public class BudgetService {
             );
         }
         else {
-            //TODO: Family function. All members have access to this function.
-            // FamilyBudgets budget = familyBudgetsRepository.findByFamily(family)
-            //         .orElseThrow(() -> new BudgetNotExistException("Family budget doesn't exist!"));
-            // budget.setBudgetLeft(budget.getBudgetLeft().add(addition));
-            // FamilyBudgets save = familyBudgetsRepository.save(budget);
-            // return new BudgetResponse(
-            //     budget.getMonthlyBudget(), budget.getDailyLimit(), budget.getPeriodFirstDay(), budget.getBudgetLeft()
-            // );
-            PersonalBudgets budget = personalBudgetsRepository.findByUser(user)
-                    .orElseThrow(() -> new BudgetNotExistException("Personal budget doesn't exist!"));
+            //Any family member may log spending, so any member may reach this branch.
+            FamilyBudgets budget = familyBudgetsRepository.findByFamily(family)
+                    .orElseThrow(() -> new BudgetNotExistException("Family budget doesn't exist!"));
+            rollOverIfNeeded(budget);
             budget.setBudgetLeft(budget.getBudgetLeft().subtract(subtraction));
-            PersonalBudgets save = personalBudgetsRepository.save(budget);
+            FamilyBudgets save = familyBudgetsRepository.save(budget);
 
             return new BudgetResponse(
                 save.getMonthlyBudget(), save.getDailyLimit(), save.getPeriodFirstDay(), save.getBudgetLeft()
@@ -147,29 +145,44 @@ public class BudgetService {
         Long family = profileService.getProfileFamily(user);
 
         if(family == null) {
-            return personalBudgetsRepository.findByUser(user)
+            Budgets budget = personalBudgetsRepository.findByUser(user)
                 .orElseGet(() -> {
                     PersonalBudgets newBudget = new PersonalBudgets();
                     newBudget = (PersonalBudgets)setDefaultBudget(user, newBudget);
                     return newBudget;
                 });
+            rollOverIfNeeded(budget);
+            return budget;
         }
         else {
-            //TODO: Family budget implementation and family-owner-only write privilege
-            //if(!FamilyService.isFamilyOwner()) 
-            // throw new FamilyBudgetAccessDeniedException("Only owner can operate family budget");
-            //familyBudgetsRepository.findByFamily(family)
-            // .orElseGet(() -> {
-            //  FamilyBudgets newBudget = new FamilyBudgets();
-            //  newBudget = (FamilyBudgets)setDefaultBudget(family, newBudget);
-            //  return newBudget;
-            //  });
-            return personalBudgetsRepository.findByUser(user).orElseGet(() -> {
-                PersonalBudgets newBudget = new PersonalBudgets();
-                newBudget = (PersonalBudgets) setDefaultBudget(user, newBudget);
+            if(!familyService.isFamilyOwner(user, family))
+                throw new FamilyBudgetAccessDeniedException("Only the family owner can set the family budget");
+            Budgets budget = familyBudgetsRepository.findByFamily(family).orElseGet(() -> {
+                FamilyBudgets newBudget = new FamilyBudgets();
+                newBudget = (FamilyBudgets) setDefaultBudget(family, newBudget);
                 return newBudget;
             });
+            rollOverIfNeeded(budget);
+            return budget;
         }
+    }
+
+    //Advances the period to the most recent monthly anniversary of its start day that
+    //isn't in the future, and resets budgetLeft to the full monthlyBudget, whenever at
+    //least one full month has elapsed since the last recorded period start. A no-op for
+    //a brand-new/never-set-up budget (periodFirstDay is null) or one whose period hasn't
+    //rolled over yet.
+    private boolean rollOverIfNeeded(Budgets budget) {
+        LocalDate periodStart = budget.getPeriodFirstDay();
+        if(periodStart == null) return false;
+
+        LocalDate today = LocalDate.now();
+        if(today.isBefore(periodStart.plusMonths(1))) return false;
+
+        long monthsElapsed = ChronoUnit.MONTHS.between(periodStart, today);
+        budget.setPeriodFirstDay(periodStart.plusMonths(monthsElapsed));
+        budget.setBudgetLeft(budget.getMonthlyBudget());
+        return true;
     }
 
     private Budgets setDefaultBudget(Long owner, Budgets newBudget) {
@@ -182,10 +195,9 @@ public class BudgetService {
     }
 
     private Budgets saveBudget(Budgets budget) {
-        if(budget instanceof PersonalBudgets)
-            return personalBudgetsRepository.save((PersonalBudgets)budget);
+        if(budget instanceof PersonalBudgets personalBudgets)
+            return personalBudgetsRepository.save(personalBudgets);
         else
-            //TODO: return familyBudgetsRepository.save((FamilyBudgets) budget);
-            return personalBudgetsRepository.save((PersonalBudgets) budget);
+            return familyBudgetsRepository.save((FamilyBudgets) budget);
     }
 }

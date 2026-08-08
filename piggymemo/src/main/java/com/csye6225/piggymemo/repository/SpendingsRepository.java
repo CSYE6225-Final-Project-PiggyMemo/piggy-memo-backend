@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.csye6225.piggymemo.dto.DailySpending;
+import com.csye6225.piggymemo.dto.FamilyMemberDailySpending;
 import com.csye6225.piggymemo.entity.Spendings;
 
 import java.time.OffsetDateTime;
@@ -14,6 +15,8 @@ import java.util.List;
 
 public interface SpendingsRepository extends JpaRepository<Spendings, Long> {
     Page<Spendings> findByUserIdOrderByCreatedAtDesc(Long userId, Pageable pageable);
+    Page<Spendings> findByUserIdAndFamilyIdIsNullOrderByCreatedAtDesc(Long userId, Pageable pageable);
+    Page<Spendings> findByFamilyIdOrderByCreatedAtDesc(Long familyId, Pageable pageable);
 
     @Query(value = """
         SELECT CAST(s.created_at AT TIME ZONE :timeZone AS date) AS date,
@@ -27,4 +30,31 @@ public interface SpendingsRepository extends JpaRepository<Spendings, Long> {
         ORDER BY 1
         """, nativeQuery = true)
     List<DailySpending> findDailySpendingByMonth(@Param("userId") Long userId, @Param("monthStart") OffsetDateTime monthStart, @Param("nextMonthStart") OffsetDateTime nextMonthStart, @Param("timeZone") String timeZone);
+
+    @Query(value = """
+        SELECT CAST(s.created_at AT TIME ZONE :timeZone AS date) AS date,
+               SUM(s.amount) AS amount
+        FROM spendings s
+        WHERE s.family_id = :familyId
+          AND s.amount > 0
+          AND s.created_at >= :monthStart
+          AND s.created_at < :nextMonthStart
+        GROUP BY 1
+        ORDER BY 1
+        """, nativeQuery = true)
+    List<DailySpending> findDailySpendingByMonthForFamily(@Param("familyId") Long familyId, @Param("monthStart") OffsetDateTime monthStart, @Param("nextMonthStart") OffsetDateTime nextMonthStart, @Param("timeZone") String timeZone);
+
+    @Query(value = """
+        SELECT CAST(s.created_at AT TIME ZONE :timeZone AS date) AS date,
+               s.user_id AS "userId",
+               SUM(s.amount) AS amount
+        FROM spendings s
+        WHERE s.family_id = :familyId
+          AND s.amount > 0
+          AND s.created_at >= :monthStart
+          AND s.created_at < :nextMonthStart
+        GROUP BY 1, 2
+        ORDER BY 1, 2
+        """, nativeQuery = true)
+    List<FamilyMemberDailySpending> findFamilyMemberDailySpendingByMonth(@Param("familyId") Long familyId, @Param("monthStart") OffsetDateTime monthStart, @Param("nextMonthStart") OffsetDateTime nextMonthStart, @Param("timeZone") String timeZone);
 }
